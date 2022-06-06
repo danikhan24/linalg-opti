@@ -3,8 +3,8 @@ pandas
 matplotlib
 scikit-learn
 scipy
-torch
-tqdm
 
 # optional
 jupyterlab
+torch
+tqdm

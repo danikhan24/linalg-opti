@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sc
 
 
-def accuracy(y_pred, y_actual, threshold=0.5):
+def accuracy(y_pred, y_actual, threshold=0.25):
     return (np.linalg.norm(y_pred - y_actual) < threshold) * 1
 
 

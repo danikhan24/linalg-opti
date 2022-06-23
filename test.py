@@ -19,14 +19,14 @@ def main():
     # Building the Network
 
     net = Network()
-    net.add(DenseLayer(2, 10))
+    net.add(DenseLayer(2, 5))
     net.add(ActivationLayer(tanh, tanh_grad))
-    net.add(DenseLayer(10, 1))
+    net.add(DenseLayer(5, 1))
     net.add(ActivationLayer(tanh, tanh_grad))
 
     # Fitting
     net.use(mse, mse_grad)
-    net.fit(x_train, y_train, epochs=2000, learning_rate=0.001)
+    net.fit(x_train, y_train, epochs=1000, learning_rate=0.1)
 
     # Testing
     results, err, acc = net.predict(x_train, y_train)

@@ -1,20 +1,30 @@
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
 
 
 def dim_reduction(X, y, saveimg=True):
+    """ Performs dimensionality reduction and plots resulting data as a scatter plot
+    Args:
+        X:          First 13 columns of hearts dataset
+        y:          Target label (heart disease)
+        saveimg:    saves image in .../figures/ folder when TRUE
+
+    Returns:
+        Transformed dataset represented by two features"""
+    
     print("Performing PCA on the data")
+    # reduce data to two columns
     pca = PCA(n_components=2).fit_transform(X).T
     plt.figure(figsize=(8, 6))
     plt.title("PCA applied to X")
-    plt.scatter(pca[0][y == 0], pca[1][y == 0], label="no heart disease")    
+    # scatter plot transformed data
+    plt.scatter(pca[0][y == 0], pca[1][y == 0], label="no heart disease")
     plt.scatter(pca[0][y == 1], pca[1][y == 1], color="red", label="heart disease")
 
     plt.legend()
 
     if saveimg:
+        # save scatter plot
         plt.savefig("figures/pca_n2.png", bbox_inches="tight")
         print("A plot of the transformed data is saved in the .../figures/ folder \n")
 

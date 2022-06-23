@@ -1,5 +1,6 @@
 import numpy as np
 from load_data import load_data
+from dim_red import dim_reduction
 
 
 def stratify_cv(data, n_splits=4):
@@ -23,10 +24,13 @@ def stratify_cv(data, n_splits=4):
 
 
 def main():
-    _, _, y_train, y_test = stratify_cv(load_data(split_xy=False))
+    X, y = load_data(split_xy=True)
+    X_train, X_test, y_train, y_test = stratify_cv(np.c_[dim_reduction(X, y, saveimg=False), y])
     print(np.unique(y_train, return_counts=True))
     print(np.unique(y_test, return_counts=True))
 
+    print(X_train.shape)
+    print(X_test.shape)
 
 if __name__ == "__main__":
     main()

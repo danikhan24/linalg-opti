@@ -1,5 +1,4 @@
 import numpy as np
-import scipy as sc
 
 
 def accuracy(y_pred, y_actual, threshold=0.5):
@@ -38,8 +37,8 @@ class Adam:
         self.mdw = self.beta1 * self.mdw + (1 - self.beta1) * dw
         self.mdb = self.beta1 * self.mdb + (1 - self.beta1) * db
         # RMS beta_2
-        self.vdw = self.beta2 * self.vdw + (1 - self.beta2) * (dw ** 2)
-        self.vdb = self.beta2 * self.vdb + (1 - self.beta2) * (db ** 2)
+        self.vdw = self.beta2 * self.vdw + (1 - self.beta2) * (dw**2)
+        self.vdb = self.beta2 * self.vdb + (1 - self.beta2) * (db**2)
         # A i,k
         A_mdw = self.mdw / (1 - self.beta1)
         A_mdb = self.mdb / (1 - self.beta1)
@@ -173,7 +172,7 @@ class Network:
         err_array = []
 
         # training loop
-        for i in range(1, epochs+1):
+        for i in range(1, epochs + 1):
             err = 0
             acc = 0
             for j in range(samples):
@@ -200,7 +199,9 @@ class Network:
             acc_array.append(acc)
 
             if i % 100 == 0:
-                print("   epoch %d/%d   error=%f   accuracy=%f " % (i, epochs, err, acc))
+                print(
+                    "   epoch %d/%d   error=%f   accuracy=%f " % (i, epochs, err, acc)
+                )
 
         self.accuracy_metric = acc_array
         self.error_metric = err_array

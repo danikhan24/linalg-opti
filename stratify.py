@@ -26,11 +26,12 @@ def stratify_cv(data, n_splits=4):
 def main():
     X, y = load_data(split_xy=True)
     X_train, X_test, y_train, y_test = stratify_cv(np.c_[dim_reduction(X, y, saveimg=False), y])
-    print(np.unique(y_train, return_counts=True))
-    print(np.unique(y_test, return_counts=True))
 
     print(X_train.shape)
     print(X_test.shape)
+    print(np.unique(y_train, return_counts=True))
+    print(np.unique(y_test, return_counts=True))
+
 
 if __name__ == "__main__":
     main()

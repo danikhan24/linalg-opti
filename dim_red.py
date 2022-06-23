@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
 
 
 def dim_reduction(X, y, saveimg=True):

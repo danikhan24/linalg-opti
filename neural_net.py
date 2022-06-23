@@ -3,7 +3,7 @@ import scipy as sc
 
 
 def accuracy(y_pred, y_actual, threshold=0.5):
-    return (threshold - np.linalg.norm(y_pred - y_actual) > 0) * 1
+    return (np.linalg.norm(y_pred - y_actual) < threshold) * 1
 
 
 # Base class
@@ -12,86 +12,76 @@ class Layer:
         self.input = None
         self.output = None
 
-    # computes the output Y of a layer for a given input X
-    def forward_propagation(self, input):
+    # Forward propogation
+    def forward(self, input):
         raise NotImplementedError
 
-    # computes dE/dX for a given dE/dY (and update parameters if any)
-    def backward_propagation(self, output_error, learning_rate):
+    # Backward propogation
+    def backward(self, output_error, learning_rate):
         raise NotImplementedError
 
 
-class AdamOptim:
-    def __init__(self, eta=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
-        self.m_dw = 0
-        self.v_dw = 0
-        self.m_db = 0
-        self.v_db = 0
+class Adam:
+    def __init__(self, learning_rate=0.001, beta1=0.9, beta2=0.999, perturbation=1e-11):
+        self.mdw = 0
+        self.vdw = 0
+        self.mdb = 0
+        self.vdb = 0
         self.beta1 = beta1
         self.beta2 = beta2
-        self.epsilon = epsilon
-        self.eta = eta
+        self.perturbation = perturbation
+        self.eta = learning_rate
 
-    def update(self, eta, t, w, b, dw, db):
-        t = 1
-        ## dw, db are from current minibatch
-        ## momentum beta 1
-        # *** weights *** #
-        self.m_dw = self.beta1 * self.m_dw + (1 - self.beta1) * dw
-        # *** biases *** #
-        self.m_db = self.beta1 * self.m_db + (1 - self.beta1) * db
+    def update_params(self, learning_rate, w, b, dw, db):
 
-        ## rms beta 2
-        # *** weights *** #
-        self.v_dw = self.beta2 * self.v_dw + (1 - self.beta2) * (dw ** 2)
-        # *** biases *** #
-        self.v_db = self.beta2 * self.v_db + (1 - self.beta2) * (db ** 2)
+        ## Momentum beta_1
+        self.mdw = self.beta1 * self.mdw + (1 - self.beta1) * dw
+        self.mdb = self.beta1 * self.mdb + (1 - self.beta1) * db
+        # RMS beta_2
+        self.vdw = self.beta2 * self.vdw + (1 - self.beta2) * (dw ** 2)
+        self.vdb = self.beta2 * self.vdb + (1 - self.beta2) * (db ** 2)
+        # A i,k
+        A_mdw = self.mdw / (1 - self.beta1)
+        A_mdb = self.mdb / (1 - self.beta1)
+        A_vdw = self.vdw / (1 - self.beta2)
+        A_vdb = self.vdb / (1 - self.beta2)
 
-        ## bias correction
-        m_dw_corr = self.m_dw / (1 - self.beta1 ** t)
-        m_db_corr = self.m_db / (1 - self.beta1 ** t)
-        v_dw_corr = self.v_dw / (1 - self.beta2 ** t)
-        v_db_corr = self.v_db / (1 - self.beta2 ** t)
-
-        ## update weights and biases
-        w = w - self.eta * (m_dw_corr / (np.sqrt(v_dw_corr) + self.epsilon))
-        b = b - self.eta * (m_db_corr / (np.sqrt(v_db_corr) + self.epsilon))
+        ## Updating weights, biases; really small perturbation to ensure that we don't divide by zero
+        w = w - learning_rate * (A_mdw / (np.sqrt(A_vdw) + self.perturbation))
+        b = b - learning_rate * (A_mdb / (np.sqrt(A_vdb) + self.perturbation))
         return w, b
 
 
 # Inherited
 class DenseLayer(Layer):
-    # input_size = number of input neurons
-    # output_size = number of output neurons
-    def __init__(self, input_size, output_size):
-        self.weights = np.random.rand(input_size, output_size) - 0.5
-        self.weights_old = np.random.rand(input_size, output_size) - 0.5
-        self.bias = np.random.rand(1, output_size) - 0.5
+    # input_size = number of input_neurons
+    # output_size = number of output_neurons
+    def __init__(self, input_neurons, output_neurons):
+        self.weights = np.random.rand(input_neurons, output_neurons) - 0.5
+        self.weights_old = np.random.rand(input_neurons, output_neurons) - 0.5
+        self.bias = np.random.rand(1, output_neurons) - 0.5
 
-    # returns output for a given input
-    def forward_propagation(self, input_data):
+    def forward(self, input_data):
         self.input = input_data
         self.output = np.dot(self.input, self.weights) + self.bias
         return self.output
 
-    # computes dE/dW, dE/dB for a given output_error=dE/dY. Returns input_error=dE/dX.
-    def backward_propagation(self, output_error, learning_rate):
-        adam = AdamOptim()
+    def backward(self, output_error, learning_rate):
+        adam = Adam()
         input_error = np.dot(output_error, self.weights.T)
         weights_error = np.dot(self.input.T, output_error)
 
         self.weights_old = self.weights
 
-        self.weights, self.bias = adam.update(
-            t=1,
-            eta=learning_rate,
+        # Use adam to update weights and biases
+        self.weights, self.bias = adam.update_params(
+            learning_rate=learning_rate,
             w=self.weights,
             b=self.bias,
             dw=weights_error,
             db=output_error,
         )
 
-        # update parameters
         return input_error
 
 
@@ -99,30 +89,25 @@ class DenseLayer(Layer):
 
 
 class ActivationLayer(Layer):
-    def __init__(self, activation, activation_prime):
+    def __init__(self, activation, grad_activation):
         self.activation = activation
-        self.activation_prime = activation_prime
+        self.grad_activation = grad_activation
 
-    # returns the activated input
-    def forward_propagation(self, input_data):
+    # Just activation
+    def forward(self, input_data):
         self.input = input_data
         self.output = self.activation(self.input)
         return self.output
 
-    # Returns input_error=dE/dX for a given output_error=dE/dY.
-    # learning_rate is not used because there is no "learnable" parameters.
-    def backward_propagation(self, output_error, learning_rate):
-        return self.activation_prime(self.input) * output_error
-
-
-#
+    def backward(self, output_error, learning_rate):
+        return self.grad_activation(self.input) * output_error
 
 
 class Network:
     def __init__(self):
         self.layers = []
         self.loss = None
-        self.loss_prime = None
+        self.grad_loss = None
         self.accuracy_metric = []
         self.error_metric = []
 
@@ -131,13 +116,13 @@ class Network:
         self.layers.append(layer)
 
     # set loss to use
-    def use(self, loss, loss_prime):
+    def use(self, loss, grad_loss):
         self.loss = loss
-        self.loss_prime = loss_prime
+        self.grad_loss = grad_loss
 
     # predict output for given input
 
-    def predict(self, input_data):
+    def predict(self, input_data, y_test):
         # sample dimension first
         samples = len(input_data)
         result = []
@@ -148,19 +133,17 @@ class Network:
         for i in range(samples):
 
             # forward propagation
-            output = input_data[i]
+            output = np.array([input_data[i]])
 
             for layer in self.layers:
-                output = layer.forward_propagation(output)
+                output = layer.forward(output)
 
-            err += self.loss(input_data[i], output)
-            acc += accuracy(input_data[i], output)
+            err += self.loss(np.array([y_test[i]]), output)
+            acc += accuracy(np.array([y_test[i]]), output)
             result.append(output)
 
         err /= samples
         acc = acc / samples
-        print(err)
-        print(acc)
         print("Prediction error=%f   accuracy=%f " % (err, acc))
 
         return result, err, acc
@@ -179,18 +162,18 @@ class Network:
             acc = 0
             for j in range(samples):
                 # forward propagation
-                output = x_train[j]
+                output = np.array([x_train[j]])
                 for layer in self.layers:
-                    output = layer.forward_propagation(output)
+                    output = layer.forward(output)
 
                 # compute loss and accuracy
-                err += self.loss(y_train[j], output)
-                acc += accuracy(y_train[j], output)
+                err += self.loss(np.array([y_train[j]]), output)
+                acc += accuracy(np.array([y_train[j]]), output)
 
                 # backward propagation
-                error = self.loss_prime(y_train[j], output)
+                error = self.grad_loss(y_train[j], output)
                 for layer in reversed(self.layers):
-                    error = layer.backward_propagation(error, learning_rate)
+                    error = layer.backward(error, learning_rate)
 
             # calculate average error and accuracy on all samples
             err /= samples

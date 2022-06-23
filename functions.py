@@ -24,3 +24,11 @@ def tanh(x):
 def tanh_grad(x):
     return 1 - np.tanh(x) ** 2
 
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def sigmoid_grad(x):
+    f = sigmoid(x)
+    return f * (1 - f)

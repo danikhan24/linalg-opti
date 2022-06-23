@@ -120,6 +120,22 @@ class Network:
         self.loss = loss
         self.grad_loss = grad_loss
 
+    def forward_propagation(self, input_data):
+        # sample dimension first
+        samples = len(input_data)
+        result = []
+
+        # run network over all samples
+        for i in range(samples):
+            # forward propagation
+            output = np.array([input_data[i]])
+
+            for layer in self.layers:
+                output = layer.forward(output)
+            result.append(output)
+
+        return result
+
     # predict output for given input
 
     def predict(self, input_data, y_test):
@@ -144,13 +160,13 @@ class Network:
 
         err /= samples
         acc = acc / samples
-        print("Prediction error=%f   accuracy=%f " % (err, acc))
+        print("Prediction error=%f   accuracy=%f \n" % (err, acc))
 
         return result, err, acc
 
     # train the network
     def fit(self, x_train, y_train, epochs, learning_rate):
-        print(" Fitting Neural Network")
+        print("Fitting Neural Network")
         # sample dimension first
         samples = len(x_train)
         acc_array = []
@@ -184,7 +200,7 @@ class Network:
             acc_array.append(acc)
 
             if i % 100 == 0:
-                print("epoch %d/%d   error=%f   accuracy=%f " % (i, epochs, err, acc))
+                print("   epoch %d/%d   error=%f   accuracy=%f " % (i, epochs, err, acc))
 
         self.accuracy_metric = acc_array
         self.error_metric = err_array

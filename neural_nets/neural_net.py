@@ -109,6 +109,8 @@ class Network:
         self.grad_loss = None
         self.accuracy_metric = []
         self.error_metric = []
+        self.testing_accuracy = []
+        self.testing_error = []
 
     # add layer to network
     def add(self, layer):
@@ -164,17 +166,22 @@ class Network:
         return result, err, acc
 
     # train the network
-    def fit(self, x_train, y_train, epochs, learning_rate):
+    def fit(self, x_train, y_train, x_test, y_test, epochs, learning_rate):
         print("Fitting Neural Network")
         # sample dimension first
         samples = len(x_train)
+        samples_test = len(x_test)
         acc_array = []
         err_array = []
+        test_acc_array = []
+        test_err_array = []
 
         # training loop
-        for i in range(1, epochs + 1):
+        for i in range(1, epochs+1):
             err = 0
             acc = 0
+            test_acc = 0
+            test_err = 0
             for j in range(samples):
                 # forward propagation
                 output = np.array([x_train[j]])
@@ -190,18 +197,31 @@ class Network:
                 for layer in reversed(self.layers):
                     error = layer.backward(error, learning_rate)
 
+            for j in range(samples_test):
+                output_test = np.array([x_test[j]])
+                for layer in self.layers:
+                    output_test = layer.forward(output_test)
+                test_err += self.loss(np.array([y_test[j]]), output_test)
+                test_acc += accuracy(np.array([y_test[j]]), output_test)
+
             # calculate average error and accuracy on all samples
             err /= samples
             acc = acc / samples
+            test_err /= samples_test
+            test_acc = test_acc / samples_test
             # yeah 2 lines above are completely different operations
 
             err_array.append(err)
             acc_array.append(acc)
-
+            test_err_array.append(test_err)
+            test_acc_array.append(test_acc)
             if i % 100 == 0:
                 print(
-                    "   epoch %d/%d   error=%f   accuracy=%f " % (i, epochs, err, acc)
+                "epoch %d/%d   error=%f   accuracy=%f   test_err=%f   test_acc=%f"
+                % (i, epochs, err, acc, test_err, test_acc)
                 )
 
         self.accuracy_metric = acc_array
         self.error_metric = err_array
+        self.testing_accuracy = test_acc_array
+        self.testing_error = test_err

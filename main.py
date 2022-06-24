@@ -41,7 +41,7 @@ def main():
 
     # Fitting the Network
     net.use(bce, bce_grad)
-    net.fit(X_train, y_train, epochs=2000, learning_rate=0.001)
+    net.fit(X_train, y_train, X_test, y_test, epochs=2000, learning_rate=0.001)
     # Testing
     net.predict(X_test, y_test)
 

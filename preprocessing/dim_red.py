@@ -1,8 +1,9 @@
+from posixpath import split
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 
-def dim_reduction(X, y, saveimg=True):
+def dim_reduction(X, y, saveimg=True, img_name="pca_normalized"):
     """ Performs dimensionality reduction and plots resulting data as a scatter plot
     Args:
         X:          First 13 columns of hearts dataset
@@ -25,7 +26,7 @@ def dim_reduction(X, y, saveimg=True):
 
     if saveimg:
         # save scatter plot
-        plt.savefig("figures/pca_n2.png", bbox_inches="tight")
+        plt.savefig("figures/"+img_name+".png", bbox_inches="tight")
         print("A plot of the transformed data is saved in the .../figures/ folder \n")
 
     return pca.T
@@ -35,7 +36,7 @@ def main():
     from load_data import load_data
 
     X, y = load_data(split_xy=True)
-    print(dim_reduction(X, y, saveimg=False).shape)
+    dim_reduction(X,y, saveimg=True, img_name="pca")
 
 
 if __name__ == "__main__":

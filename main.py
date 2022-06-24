@@ -43,7 +43,7 @@ def main():
     net.predict(X_test, y_test)
 
     # Plot the decision boundary of the 2-dim scatter plot
-    plot_decision_boundary(X_dim, y, net, True)
+    plot_decision_boundary(X_dim, y, net, True, delta=0.01)
 
 
 if __name__ == "__main__":

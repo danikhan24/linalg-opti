@@ -1,4 +1,6 @@
+import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 
 def accuracy(y_pred, y_actual, threshold=0.5):
@@ -105,6 +107,7 @@ class ActivationLayer(Layer):
 class Network:
     def __init__(self):
         self.layers = []
+        self.best_layers = []
         self.loss = None
         self.grad_loss = None
         self.accuracy_metric = []
@@ -175,6 +178,7 @@ class Network:
         err_array = []
         test_acc_array = []
         test_err_array = []
+        best_test_err = 1e5
 
         # training loop
         for i in range(1, epochs+1):
@@ -201,6 +205,7 @@ class Network:
                 output_test = np.array([x_test[j]])
                 for layer in self.layers:
                     output_test = layer.forward(output_test)
+
                 test_err += self.loss(np.array([y_test[j]]), output_test)
                 test_acc += accuracy(np.array([y_test[j]]), output_test)
 
@@ -215,13 +220,36 @@ class Network:
             acc_array.append(acc)
             test_err_array.append(test_err)
             test_acc_array.append(test_acc)
+
+            if best_test_err > test_err:
+                print("      new best found with test error:", test_err, "at epoch:", i, "and has test_acc:", test_acc)
+                best_test_err = test_err
+                self.best_layers = copy.deepcopy(self.layers)
+
             if i % 100 == 0:
                 print(
-                "epoch %d/%d   error=%f   accuracy=%f   test_err=%f   test_acc=%f"
-                % (i, epochs, err, acc, test_err, test_acc)
+                    "   epoch %d/%d   error=%f   accuracy=%f   test_err=%f   test_acc=%f"
+                    % (i, epochs, err, acc, test_err, test_acc)
                 )
+
+        plt.figure(figsize=(8, 6))
+        plt.plot(np.arange(epochs), test_acc_array)
+        plt.title("Testing accuracy over epochs")
+        plt.xlabel("Epoch")
+        plt.ylabel("Accuracy")
+        plt.savefig("figures/testing_accuracy.png", bbox_inches="tight")
+
+
+        plt.figure(figsize=(8, 6))
+        plt.plot(np.arange(epochs), test_err_array)
+        plt.title("Test loss over epochs")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.savefig("figures/testing_error.png", bbox_inches="tight")
 
         self.accuracy_metric = acc_array
         self.error_metric = err_array
         self.testing_accuracy = test_acc_array
         self.testing_error = test_err
+
+        self.layers = copy.deepcopy(self.best_layers)

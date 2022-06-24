@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_decision_boundary(X, y, net, saveimg=True):
+def plot_decision_boundary(X, y, net, saveimg=True, delta=0.05):
     min1, max1 = X[:, 0].min() - 1, X[:, 0].max() + 1
     min2, max2 = X[:, 1].min() - 1, X[:, 1].max() + 1
 
-    x1grid = np.arange(min1, max1, 0.05)
-    x2grid = np.arange(min2, max2, 0.05)
+    x1grid = np.arange(min1, max1, delta)
+    x2grid = np.arange(min2, max2, delta)
 
     xx, yy = np.meshgrid(x1grid, x2grid)
     r1, r2 = xx.flatten(), yy.flatten()

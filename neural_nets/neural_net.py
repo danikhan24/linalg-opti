@@ -178,7 +178,7 @@ class Network:
         err_array = []
         test_acc_array = []
         test_err_array = []
-        best_test_err = 1e5
+        best_test_acc = 0
 
         # training loop
         for i in range(1, epochs+1):
@@ -221,9 +221,9 @@ class Network:
             test_err_array.append(test_err)
             test_acc_array.append(test_acc)
 
-            if best_test_err > test_err:
-                print("      new best found with test error:", test_err, "at epoch:", i, "and has test_acc:", test_acc)
-                best_test_err = test_err
+            if best_test_acc < test_acc:
+                print("      new best found at epoch %d   -   error=%f   accuracy=%f   test_err=%f   test_acc=%f" % (i, err, acc, test_err, test_acc))
+                best_test_acc = test_acc
                 self.best_layers = copy.deepcopy(self.layers)
 
             if i % 100 == 0:

@@ -35,4 +35,4 @@ The implementation of exercises 2 and 3 can be found in `neural_nets/neural_net.
 
 The implementation of exercise 4 can be found in `preprocessing/stratify.py`.
 
-The values $K_i \in \{ 2,5,10\}$ and $N \in \{ 2,5,10\}$ are specified by adjusting the architecture in `main.py`. The resulting accuracy score is shown in the terminal.
+The values $K_i \in \{ 2,5,10\}$ and $N \in \{ 2,5,10\}$ are specified by adjusting the values of parameters `depth` and `width` at line 39 in `main.py`. The resulting accuracy score is shown in the terminal.

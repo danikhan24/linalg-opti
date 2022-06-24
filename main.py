@@ -1,4 +1,3 @@
-from asyncio.constants import ACCEPT_RETRY_DELAY
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
@@ -37,16 +36,16 @@ def main():
     X_train, X_test, y_train, y_test = stratify_sampling(np.c_[X_dim, y])
 
     # Building the Network
-    net = define_network(width=10, depth=3, actf=relu, actf_grad=relu_grad)
+    net = define_network(width=10, depth=10, actf=relu, actf_grad=relu_grad)
 
     # Fitting the Network
     net.use(bce, bce_grad)
-    net.fit(X_train, y_train, X_test, y_test, epochs=2000, learning_rate=0.001)
+    net.fit(X_train, y_train, X_test, y_test, epochs=200, learning_rate=0.0001)
     # Testing
     net.predict(X_test, y_test)
 
     # Plot the decision boundary of the 2-dim scatter plot
-    plot_decision_boundary(X_dim, y, net, True, delta=0.01)
+    plot_decision_boundary(X_dim, y, net, True, delta=0.05)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+from asyncio.constants import ACCEPT_RETRY_DELAY
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
@@ -8,6 +9,18 @@ from preprocessing.load_data import load_data
 from preprocessing.dim_red import dim_reduction
 from preprocessing.stratify import stratify_sampling
 
+
+def define_network(width, depth, actf, actf_grad):
+    # Defines a dense network with certain width and depth
+    net = Network()
+    net.add(DenseLayer(2, width))
+    net.add(ActivationLayer(actf, actf_grad))
+    for i in range(1, depth):
+        net.add(DenseLayer(width, width))
+        net.add(ActivationLayer(actf, actf_grad))
+    net.add(DenseLayer(width, 1))
+    net.add(ActivationLayer(sigmoid, sigmoid_grad))
+    return net
 
 def main():
     # Importing dataset
@@ -24,17 +37,7 @@ def main():
     X_train, X_test, y_train, y_test = stratify_sampling(np.c_[X_dim, y])
 
     # Building the Network
-    net = Network()
-    net.add(DenseLayer(2, 10))
-    net.add(ActivationLayer(relu, relu_grad))
-    net.add(DenseLayer(10, 10))
-    net.add(ActivationLayer(relu, relu_grad))
-    net.add(DenseLayer(10, 5))
-    net.add(ActivationLayer(relu, relu_grad))
-    net.add(DenseLayer(5, 5))
-    net.add(ActivationLayer(relu, relu_grad))
-    net.add(DenseLayer(5, 1))
-    net.add(ActivationLayer(sigmoid, sigmoid_grad))
+    net = define_network(width=10, depth=3, actf=relu, actf_grad=relu_grad)
 
     # Fitting the Network
     net.use(bce, bce_grad)

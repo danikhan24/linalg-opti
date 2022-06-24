@@ -2,6 +2,7 @@ import pandas as pd
 
 
 def load_data(split_xy=True):
+    print("Loading the data \n")
     heart = pd.read_csv("heart.csv", header=None)
     # change the label '-1' to '0'
     heart.loc[heart[13] < 1, 13] = 0
